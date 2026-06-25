@@ -1,0 +1,49 @@
+# docker-compose.yml
+# =========================================================
+# Docker Compose - ETL Order Service (Development)
+# =========================================================
+# Usage:
+# docker-compose up --build      # Start all services
+# docker-compose up -d           # Start in background
+# docker-compose logs -f etl-service # Follow logs
+# docker-compose down -v         # Stop and remove volumes
+# =========================================================
+
+version: "3.9"
+
+services:
+  etl-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runtime
+    container_name: etl-service
+    ports:
+      - "8000:8000"
+    environment:
+      APP_ENV: "development"
+      DEBUG: "true"
+      LOG_LEVEL: "DEBUG"
+      DATABASE_URL: "sqlite+aiosqlite:///./data/orders.db"
+      AI_PROVIDER: "${AI_PROVIDER:-openai}"
+      AI_MODEL: "${AI_MODEL:-gpt-4o-mini}"
+      OPENAI_API_KEY: "${OPENAI_API_KEY:-}"
+      ANTHROPIC_API_KEY: "${ANTHROPIC_API_KEY:-}"
+      SECRET_KEY: "${SECRET_KEY:-dev-secret-key-change-in-production}"
+      ALLOWED_ORIGINS: "http://localhost:3000,http://localhost:8080"
+      ALLOWED_HOSTS: "localhost,127.0.0.1"
+    volumes:
+      - ./data:/app/data
+      - ./app:/app/app:ro
+      - ./main.py:/app/main.py:ro
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    restart: unless-stopped
+
+volumes:
+  data:
+    driver: local

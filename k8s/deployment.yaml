@@ -1,0 +1,87 @@
+# k8s/deployment.yaml
+# =========================================================
+# Kubernetes Deployment - ETL Order Service
+# =========================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: etl-service
+  namespace: default
+  labels:
+    app: etl-service
+    version: "1.0.0"
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: etl-service
+  template:
+    metadata:
+      labels:
+        app: etl-service
+        version: "1.0.0"
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        runAsGroup: 1001
+        fsGroup: 1001
+      containers:
+            - name: etl-service
+        image: etl-service:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+                - containerPort: 8000
+          protocol: TCP
+        envFrom:
+                - configMapRef:
+            name: etl-service-config
+                - secretRef:
+            name: etl-service-secrets
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "2Gi"
+            cpu: "1000m"
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 8000
+          initialDelaySeconds: 30
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /readyz
+            port: 8000
+          initialDelaySeconds: 15
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        volumeMounts:
+                - name: data-volume
+          mountPath: /app/data
+      volumes:
+            - name: data-volume
+        emptyDir: {}
+
+# k8s/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: etl-service
+  namespace: default
+  labels:
+    app: etl-service
+spec:
+  type: ClusterIP
+  selector:
+    app: etl-service
+  ports:
+    - name: http
+    port: 80
+    targetPort: 8000
+    protocol: TCP

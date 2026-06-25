@@ -1,0 +1,65 @@
+# k8s/configmap.yaml
+# =========================================================
+# ConfigMap - Non-sensitive application configuration
+# =========================================================
+# Sensitive values (API keys, secrets) must be stored in
+# Kubernetes Secrets, NOT in this ConfigMap.
+# =========================================================
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: etl-service-config
+  namespace: default
+  labels:
+    app: etl-service
+    version: "1.0.0"
+    component: config
+
+data:
+  # Application
+  APP_NAME: "ETL Order Service"
+  APP_VERSION: "1.0.0"
+  APP_ENV: "production"
+  DEBUG: "false"
+  LOG_LEVEL: "INFO"
+
+  # Server
+  HOST: "0.0.0.0"
+  PORT: "8000"
+  WORKERS: "1"
+
+  # Database
+  DATABASE_URL: "sqlite+aiosqlite:///./data/orders.db"
+  DATABASE_ECHO: "false"
+
+  # AI Configuration
+  AI_PROVIDER: "openai"
+  AI_MODEL: "gpt-4o-mini"
+  AI_TEMPERATURE: "0.0"
+  AI_MAX_TOKENS: "1024"
+  AI_TIMEOUT_SECONDS: "30"
+  AI_MAX_RETRIES: "2"
+
+  # Embedding
+  EMBEDDING_MODEL: "all-MiniLM-L6-v2"
+  EMBEDDING_DEVICE: "cpu"
+  FAISS_INDEX_PATH: "./data/faiss_index"
+  EMBEDDING_BATCH_SIZE: "64"
+
+  # Caching
+  CACHE_TTL_SECONDS: "60"
+  CACHE_MAX_SIZE: "1000"
+
+  # ETL
+  ETL_DATA_DIR: "./data"
+  ETL_BATCH_SIZE: "1000"
+  EUR_TO_USD_RATE: "1.1"
+
+  # Rate limiting
+  RATE_LIMIT_PER_MINUTE: "60"
+  RATE_LIMIT_AI_PER_MINUTE: "10"
+
+  # Observability
+  ENABLE_METRICS: "true"
+  METRICS_PATH: "/metrics"

@@ -1,0 +1,25 @@
+# k8s/service.yaml
+# =========================================================
+# Kubernetes Service - ETL Order Service (ClusterIP)
+# =========================================================
+# Exposes the ETL Order Service pods internally within the cluster.
+# Use an Ingress or LoadBalancer on top of this for external access.
+# =========================================================
+apiVersion: v1
+kind: Service
+metadata:
+  name: etl-service
+  namespace: default
+  labels:
+    app: etl-service
+    version: "1.0.0"
+    component: api
+spec:
+  type: ClusterIP
+  selector:
+    app: etl-service
+  ports:
+    - name: http
+    port: 80
+    targetPort: 8000
+    protocol: TCP
